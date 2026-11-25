@@ -117,7 +117,8 @@ function emptyRegions(): Record<AnatomicalRegion, number> {
   return Object.fromEntries(ANATOMICAL_REGIONS.map((r) => [r, 0])) as Record<AnatomicalRegion, number>;
 }
 
-export type RegionLoadStatus = 'none' | 'low' | 'normal' | 'elevated' | 'spike';
+/** new = Belastung vorhanden, aber zu wenig Historie für einen Vergleich */
+export type RegionLoadStatus = 'none' | 'new' | 'low' | 'normal' | 'elevated' | 'spike';
 
 export interface RegionLoadRow {
   region: AnatomicalRegion;
@@ -223,7 +224,8 @@ export const LoadManagementEngine = {
     if (d28 === 0) status = 'none';
     else if ((ratio !== null && ratio >= LOAD_CONFIG.spikeRatio) || daySpike) status = 'spike';
     else if (ratio !== null && ratio >= LOAD_CONFIG.elevatedRatio) status = 'elevated';
-    else if (ratio !== null && ratio < 0.6) status = 'low';
+    else if (ratio === null) status = 'new';
+    else if (ratio < 0.6) status = 'low';
     else status = 'normal';
     return { region, day, d7, d14, d28, changePct, ratio, status };
   },
